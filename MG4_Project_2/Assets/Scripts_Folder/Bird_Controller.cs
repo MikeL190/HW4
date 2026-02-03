@@ -5,20 +5,27 @@ using UnityEngine;
 public class Bird_Controller : MonoBehaviour
 {
     [SerializeField] private int jumpForce = 10;
-    private Rigidbody2D myRigidBody;
+    [SerializeField] private Rigidbody2D myRigidBody;
 
-    // Start is called before the first frame update
+    private bool canJump = true;
+
+    public delegate void Bird_Delegate();
+    public event Bird_Delegate Pass_Obstacle_Event;
+    public event Bird_Delegate Collide_Obstacle_Event;
+    public event Bird_Delegate Jump_Event;
+
     void Start()
     {
-        myRigidBody = GetComponent<Rigidbody2D>();
+        Collide_Obstacle_Event += Stop_Movement;
+        UI_Manager.Instance.Button_Event += Start_Movement;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
+        if(Input.GetKeyDown(KeyCode.Space) && canJump)
         {
             myRigidBody.velocity = new Vector2(myRigidBody.velocity.x, jumpForce);
+            Jump_Event?.Invoke();
         }
     }
 
@@ -28,17 +35,22 @@ public class Bird_Controller : MonoBehaviour
         {
             case "Pipe Top":
             case "Pipe Bottom":
-                Debug.Log("Game Over");
+                Collide_Obstacle_Event?.Invoke();
                 break;
-            case "Ground":
-                Debug.Log("You collided with the ground");
-                break;
-            default:
-                Debug.Log("Tag not found so here is placeholder");
+            case "Pipe Middle":
+                Pass_Obstacle_Event?.Invoke();
                 break;
         }
+    }
 
-        Debug.Log(collision.gameObject.tag);
+    private void Stop_Movement()
+    {
+        canJump = false;
+    }
+
+    private void Start_Movement()
+    {
+        canJump = true;
     }
 
 }
