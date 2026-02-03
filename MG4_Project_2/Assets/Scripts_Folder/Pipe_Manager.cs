@@ -10,11 +10,20 @@ public class Pipe_Manager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Spawn_Pipe();
+        Coroutine myRoutine = StartCoroutine(Spawn_Timer());
     }
 
     public void Spawn_Pipe()
     {
         Instantiate(pipePrefab, pipeSpawner.transform.position, Quaternion.identity);
+    }
+
+    private IEnumerator Spawn_Timer()
+    {
+        while(true)
+        {
+            Spawn_Pipe();
+            yield return new WaitForSeconds(3);
+        }
     }
 }
